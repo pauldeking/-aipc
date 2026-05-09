@@ -121,8 +121,9 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .send-btn:active{transform:scale(0.95);}
 .send-btn:disabled{background:var(--border);cursor:not-allowed;}
 .drill-action-row{display:flex;gap:8px;margin-top:8px;}
-.outline-btn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--sage);background:transparent;color:var(--sage);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
-.outline-btn:hover{background:var(--sage-pale);}
+.outline-btn{flex:1;padding:10px;border-radius:8px;border:none;background:var(--gold);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+.outline-btn:hover{background:#a87d20;}
+.outline-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
 .primary-btn{flex:1;padding:10px;border-radius:8px;border:none;background:var(--blue);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}
 .primary-btn:hover{background:#0f2a42;}
 #screen-roleplay{background:var(--warm);}
@@ -1196,7 +1197,22 @@ function showDrillTyping() {
 }
 function removeDrillTyping() { const el = document.getElementById('drill-typing'); if(el) el.remove(); }
 function drillSupervisorPrompt() {
-  return `You are a senior AIPC clinical supervisor giving brief, warm, formative feedback to a Diploma of Counselling student (CHC51015). Use Australian English. Be specific about what the student actually wrote. Respond ONLY in the JSON format requested — no preamble, no markdown, no extra text.`;
+  return `You are a senior AIPC clinical supervisor giving brief, warm but HONEST formative feedback to a Diploma of Counselling student (CHC51015). Use Australian English.
+
+CRITICAL RULE: If the student's response is poor, vague, unhelpful, inappropriate, or not recognisable as a counselling response — say so clearly and kindly. Do NOT reframe bad responses as positive. Do NOT praise brevity when brevity is actually avoidance or dismissiveness. Do NOT say things like "your brevity shows you're listening" when the student has written something unhelpful like "whatever", "ok", "sure", "mm", or a single word.
+
+Examples of responses that must be flagged as insufficient:
+- Single words or very short phrases that aren't a recognised technique (e.g. "whatever", "ok", "interesting", "yeah")
+- Giving advice ("you should...", "I think you need to...")
+- Asking multiple questions at once
+- Changing the subject
+- Minimising ("it'll be fine", "don't worry")
+- Responses that are about the counsellor's feelings rather than the client's
+
+Be specific about what the student actually wrote. Be warm but direct — a good supervisor doesn't let poor practice slide.
+
+Respond ONLY in this JSON format — no preamble, no markdown, no extra text:
+{"strengths":"one honest sentence — if there are no strengths, say so briefly","develop":"one clear sentence on what was wrong or missing and why it matters clinically","example":"a stronger alternative response in quotes that the student could actually use"}`;
 }
 
 // ═══════════════════════════════════════════
@@ -1319,10 +1335,12 @@ function supervisorSystemPrompt() {
     : '';
   return `You are a senior clinical supervisor at an Australian counselling training institute (AIPC) providing formative feedback to a CHC51015 Diploma of Counselling student.
 
-Your role: Give warm, specific, clinically grounded feedback. Reference specific things the student said. Use Australian English and ACA-aligned language. Be encouraging but honest.${cumulativeNote}
+Your role: Give warm, specific, clinically grounded feedback. Reference specific things the student said. Use Australian English and ACA-aligned language. Be honest — not just encouraging.${cumulativeNote}
+
+CRITICAL HONESTY RULE: If the student's responses are poor, vague, advice-giving, dismissive, or not recognisable as good counselling practice — say so directly and kindly. Do NOT reframe poor responses as strengths. Do NOT praise brevity when the student was actually being dismissive or unhelpful. Do NOT say things like "your brevity shows you are listening" for a response that is actually inadequate. A student who types "whatever", gives advice, asks multiple questions at once, or consistently ignores the client's emotional content needs clear, specific corrective feedback — with warmth, but without sugar-coating. Your job is to help them grow, not to make them feel good about poor practice.
 
 Always respond as JSON with exactly this format — no preamble, no markdown:
-{"strengths":"2-3 sentences on what worked, referencing specific student responses","develop":"2-3 sentences on one key area to develop with clinical rationale","example":"A stronger alternative response the student could have used (as if the student said it)","criteria":["array","of","criteria","demonstrated"],"cumulativeCriteria":["any","earlier","unit","skills","demonstrated"],"readiness":"One sentence on readiness for the practical assessment"}`;
+{"strengths":"2-3 honest sentences on what genuinely worked — if nothing worked well, say so briefly","develop":"2-3 sentences on the key area to develop with clear clinical rationale — be specific about what the student actually wrote","example":"A stronger alternative response the student could have used (as if the student said it)","criteria":["array","of","criteria","demonstrated"],"cumulativeCriteria":["any","earlier","unit","skills","demonstrated"],"readiness":"One honest sentence on readiness for the practical assessment"}`;
 }
 
 function buildFeedbackPrompt(studentContent, type) {
