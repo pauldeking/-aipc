@@ -18,11 +18,12 @@
   --r:10px;--r-lg:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh;font-size:15px;line-height:1.6;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);font-size:15px;line-height:1.6;}
 h1,h2,h3,.serif{font-family:'Lora',serif;}
-.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen{display:none;height:100vh;flex-direction:column;overflow:hidden;}
 .screen.active{display:flex;}
-.screen.active.chat-screen{height:100vh;min-height:unset;overflow:hidden;}
+.screen.scroll-screen{overflow-y:auto;}
 .app-header{background:var(--blue);color:white;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .logo{font-family:'Lora',serif;font-size:16px;font-weight:600;color:white;}
 .logo span{color:#a8c5e0;font-weight:400;}
@@ -99,15 +100,12 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .divider-head{display:flex;align-items:center;gap:10px;margin:24px 0 14px;}
 .divider-head::before,.divider-head::after{content:'';flex:1;height:1px;background:var(--border-light);}
 .divider-head span{font-size:12px;color:var(--muted);white-space:nowrap;}
-#screen-drill{background:var(--warm);height:100vh;overflow:hidden;}
-.drill-header{background:white;border-bottom:1px solid var(--border-light);padding:14px 20px;flex-shrink:0;}
-.drill-mode-tag{display:inline-block;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;background:var(--sage-pale);color:var(--sage);padding:3px 9px;border-radius:20px;margin-bottom:8px;}
-.drill-header-title{font-family:'Lora',serif;font-size:16px;font-weight:500;color:var(--charcoal);margin-bottom:3px;}
-.drill-header-sub{font-size:12px;color:var(--mid);}
-.drill-focus-banner{background:var(--sage-pale);border-bottom:1px solid var(--sage-mid);padding:10px 20px;flex-shrink:0;}
-.drill-focus-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--sage);margin-bottom:3px;}
-.drill-focus-text{font-size:13px;color:var(--charcoal);}
-.drill-chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;max-width:700px;width:100%;margin:0 auto;}
+.drill-app-header{background:var(--blue);}
+.drill-focus-banner{background:var(--sage-pale);border-bottom:1px solid var(--sage-mid);padding:9px 20px;flex-shrink:0;}
+.drill-focus-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--sage);margin-bottom:2px;}
+.drill-focus-text{font-size:12px;color:var(--charcoal);line-height:1.4;}
+#screen-drill{background:var(--warm);}
+.drill-chat{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-width:700px;width:100%;margin:0 auto;}
 .prompt-card{background:white;border:1px solid var(--border-light);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:4px;}
 .prompt-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;}
 .prompt-text{font-size:14px;color:var(--charcoal);line-height:1.6;font-style:italic;}
@@ -127,7 +125,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .outline-btn:hover{background:var(--sage-pale);}
 .primary-btn{flex:1;padding:10px;border-radius:8px;border:none;background:var(--blue);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}
 .primary-btn:hover{background:#0f2a42;}
-#screen-roleplay{background:var(--warm);height:100vh;overflow:hidden;}
+#screen-roleplay{background:var(--warm);}
 .rp-header{background:white;border-bottom:1px solid var(--border-light);padding:14px 20px;flex-shrink:0;}
 .rp-title-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
 .rp-title{font-family:'Lora',serif;font-size:15px;font-weight:500;color:var(--charcoal);flex:1;}
@@ -219,6 +217,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 <body>
 <div id="screen-landing" class="screen active">
   <header class="app-header"><div class="logo">CounsellorReady <span>by AIPC</span></div><div class="header-tag">CHC51015 Diploma</div></header>
+  <div style="flex:1;overflow-y:auto;">
   <div class="hero">
     <div class="eyebrow">Diploma of Counselling · Practice Tool</div>
     <h1 class="hero-title">Build your skills.<br><em>Session by session.</em></h1>
@@ -233,6 +232,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
     </div>
     <div class="section-head">Select your current study guide</div>
     <div class="unit-list" id="landing-unit-list"></div>
+  </div>
   </div>
 </div>
 <div id="screen-unit-list" class="screen">
@@ -255,29 +255,30 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
   <div class="practical-banner" id="practical-banner"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v5M6.5 9v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1" fill="none"/></svg><span id="practical-text"></span></div>
   <div class="unit-body" id="unit-body"></div>
 </div>
-<div id="screen-drill" class="screen chat-screen">
-  <header class="app-header"><div class="logo">CounsellorReady <span>by AIPC</span></div><div class="header-tag">Skills Drill</div></header>
-  <div class="drill-header">
-    <button class="back-btn" onclick="backToUnit()">← Scenarios</button>
-    <div class="drill-mode-tag">Skills Drill</div>
-    <div class="drill-header-title" id="drill-title"></div>
-    <div class="drill-header-sub" id="drill-sub"></div>
-  </div>
+<div id="screen-drill" class="screen">
+  <header class="app-header drill-app-header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="back-btn" onclick="backToUnit()" style="color:rgba(255,255,255,0.75);margin:0;">← Scenarios</button>
+      <span style="color:rgba(255,255,255,0.3);">|</span>
+      <div class="logo" style="font-size:14px;" id="drill-header-title-inline"></div>
+    </div>
+    <div class="header-tag">Skills Drill</div>
+  </header>
   <div class="drill-focus-banner"><div class="drill-focus-label">Focus skill</div><div class="drill-focus-text" id="drill-focus"></div></div>
   <div class="drill-chat" id="drill-chat"></div>
-  <div class="drill-input-area">
-    <div class="drill-input-hint">Type your response to the client statement above</div>
-    <div class="drill-input-row">
+  <div class="drill-input-area" id="drill-input-area">
+    <div class="drill-input-hint" id="drill-input-hint">Type your response to the client statement above</div>
+    <div class="drill-input-row" id="drill-input-row">
       <textarea id="drill-input" class="response-input" rows="1" placeholder="Your response as the counsellor…" onkeydown="handleDrillKey(event)" oninput="autoResize(this)"></textarea>
       <button class="send-btn" id="drill-send-btn" onclick="submitDrillResponse()"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></button>
     </div>
-    <div class="drill-action-row">
-      <button class="outline-btn" id="drill-feedback-btn" onclick="getDrillFeedback()" style="display:none;">Get feedback</button>
-      <button class="primary-btn" id="drill-next-btn" onclick="nextDrillPrompt()" style="display:none;">Next prompt →</button>
+    <div class="drill-action-row" id="drill-action-row" style="display:none;">
+      <button class="outline-btn" id="drill-feedback-btn" onclick="getDrillFeedback()">Get feedback on my response</button>
+      <button class="primary-btn" id="drill-next-btn" onclick="nextDrillPrompt()">Next prompt →</button>
     </div>
   </div>
 </div>
-<div id="screen-roleplay" class="screen chat-screen">
+<div id="screen-roleplay" class="screen">
   <header class="app-header"><div class="logo">CounsellorReady <span>by AIPC</span></div><div class="header-tag">Role-play</div></header>
   <div class="rp-header">
     <button class="back-btn" onclick="backToUnit()" style="margin-bottom:7px;">← Scenarios</button>
@@ -891,7 +892,7 @@ let conversationHistory = [];
 let studentResponseCount = 0;
 let practicedCriteria = new Set();
 let sessionComplete = false;
-let drillResponses = [];
+let drillResponses = {};
 
 // ═══════════════════════════════════════════
 // NAVIGATION
@@ -1025,17 +1026,61 @@ function loadUnit(unit) {
 function loadDrill(drill) {
   currentDrill = drill;
   currentDrillPromptIndex = 0;
-  drillResponses = [];
-  document.getElementById('drill-title').textContent = drill.title;
-  document.getElementById('drill-sub').textContent = `${currentUnit.code} · Skills Drill`;
+  drillResponses = {};
+  // Set title in the compact header
+  const titleEl = document.getElementById('drill-header-title-inline');
+  if (titleEl) titleEl.textContent = drill.title;
   document.getElementById('drill-focus').textContent = drill.focusSkill;
   document.getElementById('drill-chat').innerHTML = '';
   document.getElementById('drill-input').value = '';
-  document.getElementById('drill-feedback-btn').style.display = 'none';
-  document.getElementById('drill-next-btn').style.display = 'none';
-  document.getElementById('drill-send-btn').disabled = false;
+  // Reset input area to initial state
+  drillSetState('input');
   showScreen('screen-drill');
   renderDrillPrompt(0);
+}
+
+// State machine for the drill input area:
+// 'input'    — textarea visible, send button active, action row hidden
+// 'answered' — textarea hidden, action row visible (feedback + next)
+// 'feedback' — textarea hidden, only Next button visible
+function drillSetState(state) {
+  const inputRow = document.getElementById('drill-input-row');
+  const hint = document.getElementById('drill-input-hint');
+  const actionRow = document.getElementById('drill-action-row');
+  const feedbackBtn = document.getElementById('drill-feedback-btn');
+  const nextBtn = document.getElementById('drill-next-btn');
+  const hasMore = currentDrill && currentDrillPromptIndex < currentDrill.prompts.length - 1;
+  if (state === 'input') {
+    inputRow.style.display = 'flex';
+    hint.style.display = 'block';
+    actionRow.style.display = 'none';
+    document.getElementById('drill-input').value = '';
+    autoResize(document.getElementById('drill-input'));
+    document.getElementById('drill-send-btn').disabled = false;
+    setTimeout(() => document.getElementById('drill-input').focus(), 100);
+  } else if (state === 'answered') {
+    inputRow.style.display = 'none';
+    hint.style.display = 'none';
+    actionRow.style.display = 'flex';
+    feedbackBtn.style.display = 'block';
+    feedbackBtn.disabled = false;
+    feedbackBtn.textContent = 'Get feedback on my response';
+    nextBtn.style.display = 'block';
+    nextBtn.style.width = '';
+    nextBtn.disabled = false;
+    nextBtn.textContent = hasMore ? 'Next prompt →' : 'Finish drill';
+  } else if (state === 'feedback') {
+    inputRow.style.display = 'none';
+    hint.style.display = 'none';
+    actionRow.style.display = 'flex';
+    feedbackBtn.style.display = 'none';
+    feedbackBtn.disabled = false;
+    feedbackBtn.textContent = 'Get feedback on my response';
+    nextBtn.style.display = 'block';
+    nextBtn.style.width = '100%';
+    nextBtn.disabled = false;
+    nextBtn.textContent = hasMore ? 'Next prompt →' : 'Finish drill';
+  }
 }
 
 function renderDrillPrompt(index) {
@@ -1049,9 +1094,7 @@ function renderDrillPrompt(index) {
     <div class="prompt-instruction">↳ ${escapeHTML(prompt.instruction)}</div>`;
   chat.appendChild(card);
   chat.scrollTop = chat.scrollHeight;
-  document.getElementById('drill-input').focus();
-  document.getElementById('drill-feedback-btn').style.display = 'none';
-  document.getElementById('drill-next-btn').style.display = 'none';
+  drillSetState('input');
 }
 
 async function submitDrillResponse() {
@@ -1059,43 +1102,56 @@ async function submitDrillResponse() {
   const text = input.value.trim();
   if (!text) return;
   const prompt = currentDrill.prompts[currentDrillPromptIndex];
-  drillResponses.push({prompt: prompt.client, response: text});
-  input.value = '';
-  autoResize(input);
+  // Store response keyed by prompt index so feedback always matches
+  drillResponses[currentDrillPromptIndex] = {prompt: prompt.client, response: text};
   document.getElementById('drill-send-btn').disabled = true;
   const chat = document.getElementById('drill-chat');
   const respDiv = document.createElement('div');
-  respDiv.style.cssText = 'background:var(--blue);color:white;border-radius:16px 4px 16px 16px;padding:11px 15px;font-size:14px;line-height:1.6;max-width:80%;margin-left:auto;margin-top:8px;';
+  respDiv.style.cssText = 'background:var(--blue);color:white;border-radius:16px 4px 16px 16px;padding:11px 15px;font-size:14px;line-height:1.6;max-width:82%;margin-left:auto;margin-top:4px;';
   respDiv.textContent = text;
   chat.appendChild(respDiv);
   chat.scrollTop = chat.scrollHeight;
-  document.getElementById('drill-feedback-btn').style.display = 'block';
-  const hasMore = currentDrillPromptIndex < currentDrill.prompts.length - 1;
-  const nextBtn = document.getElementById('drill-next-btn');
-  nextBtn.style.display = 'block';
-  nextBtn.textContent = hasMore ? 'Next prompt →' : 'Finish drill';
-  document.getElementById('drill-send-btn').disabled = false;
+  drillSetState('answered');
 }
 
 async function getDrillFeedback() {
-  const prompt = currentDrill.prompts[currentDrillPromptIndex];
-  const lastResponse = drillResponses[drillResponses.length - 1];
-  if (!lastResponse) return;
-  const chat = document.getElementById('drill-chat');
+  // Capture the index at the moment feedback is requested — never let it drift
+  const promptIndex = currentDrillPromptIndex;
+  const prompt = currentDrill.prompts[promptIndex];
+  const stored = drillResponses[promptIndex];
+  if (!stored) return;
+
+  const feedbackBtn = document.getElementById('drill-feedback-btn');
+  const nextBtn = document.getElementById('drill-next-btn');
+  feedbackBtn.disabled = true;
+  feedbackBtn.textContent = 'Getting feedback…';
+  nextBtn.disabled = true; // block Next until feedback arrives
   showDrillTyping();
+
   const feedbackPrompt = `Unit: ${currentUnit.code} — ${currentUnit.full}
 Focus skill: ${currentDrill.focusSkill}
 Client statement: "${prompt.client}"
 Task for student: ${prompt.instruction}
-Student's response: "${lastResponse.response}"
+Student's response: "${stored.response}"
 
 Give brief, specific supervisor feedback on this single drill response. Be warm and formative. Structure as JSON:
 {"strengths":"one sentence on what worked","develop":"one sentence on what to improve","example":"a stronger alternative response in quotes"}`;
+
   try {
     const result = await callClaude([{role:'user',content:feedbackPrompt}], drillSupervisorPrompt());
     removeDrillTyping();
     renderDrillFeedback(result);
-  } catch(e) { removeDrillTyping(); }
+  } catch(e) {
+    removeDrillTyping();
+    const chat = document.getElementById('drill-chat');
+    const errDiv = document.createElement('div');
+    errDiv.style.cssText = 'background:var(--crisis-light);border:1px solid #d4a0a0;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--crisis);margin-top:8px;';
+    errDiv.textContent = 'Could not load feedback — check your connection and try again.';
+    chat.appendChild(errDiv);
+  } finally {
+    // Always move to feedback state — unblocks Next
+    drillSetState('feedback');
+  }
 }
 
 function cleanJSON(raw) {
@@ -1125,8 +1181,6 @@ function nextDrillPrompt() {
   if (hasMore) {
     currentDrillPromptIndex++;
     renderDrillPrompt(currentDrillPromptIndex);
-    document.getElementById('drill-feedback-btn').style.display = 'none';
-    document.getElementById('drill-next-btn').style.display = 'none';
   } else { backToUnit(); }
 }
 
