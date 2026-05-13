@@ -192,6 +192,11 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .continue-btn:hover{background:#0f2a42;}
 .home-btn{width:100%;padding:13px;background:transparent;color:var(--mid);border:1px solid var(--border);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;}
 .home-btn:hover{border-color:var(--blue);color:var(--blue);}
+.email-btn{width:100%;padding:13px;background:var(--sage);color:white;border:none;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;margin-bottom:10px;}
+.email-btn:hover{background:var(--sage-light);}
+.email-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.email-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;padding:10px 20px;border-radius:50px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.email-toast.show{opacity:1;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:flex-end;}
 .overlay.open{display:flex;}
 .overlay-panel{background:white;border-radius:20px 20px 0 0;padding:22px 20px 30px;width:100%;max-height:80vh;overflow-y:auto;}
@@ -309,6 +314,12 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
     <div class="summary-card" id="session-summary-card" style="display:none;"><h3>Session summary</h3><div id="session-summary-content"></div></div>
     <div class="section-head" style="margin-bottom:8px;">Performance criteria coverage</div>
     <div class="criteria-progress-list" id="criteria-progress-list"></div>
+
+    <div style="background:white;border:1px solid var(--border-light);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:12px;" id="email-panel">
+      <div class="ar-title" style="margin-bottom:8px;">Email this session report</div>
+      <input id="student-name-input" type="text" placeholder="Your name (optional)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);background:var(--cream);outline:none;margin-bottom:8px;"/>
+      <button class="email-btn" id="email-btn" onclick="emailReport()">✉ Send session report to supervisor</button>
+    </div>
     <button class="continue-btn" onclick="backToUnit()">Practise another scenario</button>
     <button class="home-btn" onclick="showScreen('screen-unit-list')">Back to all units</button>
     <div style="height:20px;"></div>
@@ -317,6 +328,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 <div class="overlay" id="crisis-overlay" onclick="closeCrisisGuide(event)">
   <div class="overlay-panel"><div class="overlay-handle"></div><div class="overlay-title" id="crisis-guide-title"></div><div id="crisis-guide-content"></div></div>
 </div>
+<div class="email-toast" id="email-toast"></div>
 <script>
 // ── UNITS DATA ────────────────────────────────────────────────────────────
 const UNITS=[
@@ -988,6 +1000,66 @@ function handleDrillKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();s
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
 
 // ── INIT ──────────────────────────────────────────────────────────────────
+
+// ── EMAIL REPORT ──────────────────────────────────────────────────────────
+async function emailReport() {
+  const btn = document.getElementById('email-btn');
+  const nameInput = document.getElementById('student-name-input');
+  const studentName = nameInput ? nameInput.value.trim() || 'Anonymous' : 'Anonymous';
+
+  // Build plain-text report from last session summary
+  const summaryEl = document.getElementById('session-summary-content');
+  let reportText = '';
+  if (summaryEl && summaryEl.innerText) {
+    reportText = summaryEl.innerText;
+  } else {
+    reportText = 'No session summary available.';
+  }
+
+  // Add criteria coverage
+  const criteriaEl = document.getElementById('criteria-progress-list');
+  if (criteriaEl && criteriaEl.innerText) {
+    reportText += '\n\nPerformance Criteria Coverage:\n' + criteriaEl.innerText;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        template_params: {
+          student_name: studentName,
+          unit: currentUnit ? `${currentUnit.code} — ${currentUnit.name}` : 'Unknown',
+          scenario: currentScenario ? currentScenario.title : 'Unknown',
+          diff: currentScenario ? currentScenario.diff : '',
+          date: new Date().toLocaleDateString('en-AU'),
+          session_report: reportText
+        }
+      })
+    });
+    if (res.ok) {
+      showToast('✓ Session report sent to supervisor');
+      btn.textContent = '✓ Sent';
+    } else {
+      throw new Error('Send failed');
+    }
+  } catch(e) {
+    showToast('Could not send — check connection');
+    btn.disabled = false;
+    btn.textContent = '✉ Send session report to supervisor';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('email-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 renderUnitLists();
 function setAppHeight(){const h=window.visualViewport?window.visualViewport.height:window.innerHeight;document.documentElement.style.setProperty('--app-height',h+'px');}
 if(window.visualViewport){window.visualViewport.addEventListener('resize',setAppHeight);window.visualViewport.addEventListener('scroll',setAppHeight);}
