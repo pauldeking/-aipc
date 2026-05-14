@@ -153,6 +153,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .dot:nth-child(2){animation-delay:.2s;}
 .dot:nth-child(3){animation-delay:.4s;}
 @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-4px);}}
+@keyframes fadeHint{0%{opacity:1;}70%{opacity:1;}100%{opacity:0;}}
 .input-area{background:white;border-top:1px solid var(--border-light);padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;position:sticky;bottom:0;z-index:50;width:100%;}
 .input-hint{font-size:11px;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
 .input-row{display:flex;gap:8px;align-items:flex-end;}
@@ -392,7 +393,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
       <button onclick="addNote()" style="padding:7px 12px;font-size:12px;font-weight:600;border-radius:8px;border:none;cursor:pointer;background:var(--gold);color:white;">Save</button>
     </div>
   </div>
-  <button class="notes-fab" onclick="toggleNotes()" id="notes-fab">📝<span class="notes-badge" id="notes-badge" style="display:none;">0</span><span class="notes-tooltip">Session notes</span></button>
+  <button class="notes-fab" onclick="toggleNotes()" id="notes-fab">📝<span class="notes-badge" id="notes-badge" style="display:none;">0</span><span class="notes-tooltip">👋 Tap to leave feedback for Paul</span></button>
 </div>
 <div class="overlay" id="crisis-overlay" onclick="closeCrisisGuide(event)">
   <div class="overlay-panel"><div class="overlay-handle"></div><div class="overlay-title" id="crisis-guide-title"></div><div id="crisis-guide-content"></div></div>
@@ -1208,10 +1209,10 @@ function toggleNotes(){
 
 function showNotesHint(){
   const fab=document.getElementById('notes-fab');
-  if(!fab||sessionStorage.getItem('notesHintShown'))return;
-  sessionStorage.setItem('notesHintShown','1');
+  if(!fab||localStorage.getItem('notesHintShown'))return;
+  localStorage.setItem('notesHintShown','1');
   fab.classList.add('show-hint');
-  setTimeout(()=>fab.classList.remove('show-hint'),2500);
+  setTimeout(()=>fab.classList.remove('show-hint'),5000);
 }
 
 function addNote(){
@@ -1266,6 +1267,16 @@ function createReactionRow(msgIndex){
   label.className='reaction-label';
   label.style.cssText='font-size:11px;color:var(--muted);margin-left:2px;';
   div.appendChild(label);
+  // Show first-use hint on the very first reaction row
+  if(msgIndex===0&&!localStorage.getItem('reactionHintShown')){
+    localStorage.setItem('reactionHintShown','1');
+    const hint=document.createElement('div');
+    hint.id='reaction-hint';
+    hint.style.cssText='width:100%;padding-left:38px;margin-top:4px;font-size:11px;color:var(--blue);font-style:italic;animation:fadeHint 5s forwards;';
+    hint.textContent='👆 Tap an emoji to rate how each response felt — helps us improve the app';
+    div.appendChild(hint);
+    setTimeout(()=>{const el=document.getElementById('reaction-hint');if(el)el.remove();},5000);
+  }
   return div;
 }
 
