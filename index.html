@@ -218,10 +218,21 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .reaction-tip{visibility:hidden;opacity:0;pointer-events:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;transition:opacity .15s;z-index:100;}
 .reaction-tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--charcoal);}
 .reaction-btn:hover .reaction-tip{visibility:visible;opacity:1;}
-.notes-fab{position:fixed;top:78px;right:12px;z-index:200;width:40px;height:40px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .15s;}
+
 .notes-fab:hover{background:#0f2a42;}
 .notes-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--gold);border-radius:50%;font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;border:2px solid white;}
-.notes-panel{position:fixed;top:126px;right:12px;z-index:200;width:280px;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);border:1.5px solid var(--gold-light);overflow:hidden;}
+.notes-fab{position:fixed;bottom:90px;right:20px;z-index:200;width:44px;height:44px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.notes-fab:hover .notes-tooltip{opacity:1;visibility:visible;}
+.notes-tooltip{position:absolute;bottom:calc(100% + 8px);right:0;background:var(--charcoal);color:white;font-size:11px;font-weight:500;padding:5px 10px;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none;font-family:'DM Sans',sans-serif;}
+.notes-tooltip::after{content:'';position:absolute;top:100%;right:12px;border:4px solid transparent;border-top-color:var(--charcoal);}
+.notes-fab.show-hint .notes-tooltip{opacity:1;visibility:visible;}
+.notes-panel{position:fixed;bottom:142px;right:20px;z-index:200;width:290px;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);border:1.5px solid var(--gold-light);overflow:hidden;}
+@media(max-width:600px){
+  .notes-fab{bottom:auto;top:72px;right:12px;width:38px;height:38px;font-size:16px;}
+  .notes-tooltip{bottom:auto;top:calc(100% + 8px);}
+  .notes-tooltip::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--charcoal);}
+  .notes-panel{bottom:auto;top:118px;right:12px;width:calc(100vw - 24px);max-width:290px;}
+}
 .notes-header{background:var(--gold);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;}
 .notes-list{max-height:130px;overflow-y:auto;padding:8px 14px;border-bottom:1px solid var(--gold-light);}
 .notes-input-row{padding:8px 10px;display:flex;gap:8px;}
@@ -381,7 +392,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
       <button onclick="addNote()" style="padding:7px 12px;font-size:12px;font-weight:600;border-radius:8px;border:none;cursor:pointer;background:var(--gold);color:white;">Save</button>
     </div>
   </div>
-  <button class="notes-fab" onclick="toggleNotes()" id="notes-fab">📝<span class="notes-badge" id="notes-badge" style="display:none;">0</span></button>
+  <button class="notes-fab" onclick="toggleNotes()" id="notes-fab">📝<span class="notes-badge" id="notes-badge" style="display:none;">0</span><span class="notes-tooltip">Session notes</span></button>
 </div>
 <div class="overlay" id="crisis-overlay" onclick="closeCrisisGuide(event)">
   <div class="overlay-panel"><div class="overlay-handle"></div><div class="overlay-title" id="crisis-guide-title"></div><div id="crisis-guide-content"></div></div>
@@ -907,7 +918,7 @@ function loadScenario(sc){
   const notesPanel=document.getElementById('notes-panel');if(notesPanel)notesPanel.style.display='none';
   const fab=document.getElementById('notes-fab');if(fab)fab.style.background='var(--blue)';
   const notesFabContainer=document.getElementById('notes-fab-container');
-  if(notesFabContainer)notesFabContainer.style.display='block';
+  if(notesFabContainer){notesFabContainer.style.display='block';setTimeout(showNotesHint,800);}
   const reportSent=document.getElementById('report-sent-msg');if(reportSent)reportSent.style.display='none';
   const emailBtn=document.getElementById('email-btn');if(emailBtn){emailBtn.disabled=false;emailBtn.textContent='✉ Send session report to supervisor';}
   showScreen('screen-roleplay');startConversation(sc);startSessionTimer();
@@ -1169,6 +1180,103 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+
+// ── NOTES, REACTIONS, RATING ──────────────────────────────────────────────
+let sessionNotes=[];let notesOpen=false;let sessionCallStart=null;
+let messageReactions={};let currentRating=0;
+
+function startSessionTimer(){sessionCallStart=Date.now();}
+
+function getCallTime(){
+  if(!sessionCallStart)return'00:00';
+  const s=Math.floor((Date.now()-sessionCallStart)/1000);
+  return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+}
+
+function toggleNotes(){
+  notesOpen=!notesOpen;
+  const panel=document.getElementById('notes-panel');
+  if(panel)panel.style.display=notesOpen?'block':'none';
+  const fab=document.getElementById('notes-fab');
+  if(fab){
+    fab.style.background=notesOpen?'var(--gold)':'var(--blue)';
+    fab.classList.remove('show-hint');
+  }
+}
+
+function showNotesHint(){
+  const fab=document.getElementById('notes-fab');
+  if(!fab||sessionStorage.getItem('notesHintShown'))return;
+  sessionStorage.setItem('notesHintShown','1');
+  fab.classList.add('show-hint');
+  setTimeout(()=>fab.classList.remove('show-hint'),2500);
+}
+
+function addNote(){
+  const input=document.getElementById('note-input');
+  if(!input||!input.value.trim())return;
+  sessionNotes.push({time:getCallTime(),text:input.value.trim()});
+  input.value='';renderNotes();
+}
+
+function renderNotes(){
+  const list=document.getElementById('notes-list');
+  const badge=document.getElementById('notes-badge');
+  if(list){
+    if(sessionNotes.length===0){list.style.display='none';}
+    else{list.style.display='block';list.innerHTML=sessionNotes.map(n=>`<div style="display:flex;gap:8px;font-size:12px;margin-bottom:5px;"><span style="color:var(--gold);font-weight:700;flex-shrink:0;">[${n.time}]</span><span style="color:var(--charcoal);line-height:1.4;">${escapeHTML(n.text)}</span></div>`).join('');list.scrollTop=list.scrollHeight;}
+  }
+  if(badge){badge.style.display=sessionNotes.length>0?'flex':'none';badge.textContent=sessionNotes.length;}
+}
+
+function addReaction(msgIndex,emoji){
+  if(messageReactions[msgIndex]===emoji){delete messageReactions[msgIndex];}
+  else{messageReactions[msgIndex]=emoji;}
+  renderReactions(msgIndex);
+}
+
+function renderReactions(msgIndex){
+  const row=document.getElementById('reactions-'+msgIndex);
+  if(!row)return;
+  const current=messageReactions[msgIndex];
+  const map={'👍':'Felt natural','😕':'Felt off','💡':'Learned something','😰':'Felt stuck'};
+  row.querySelectorAll('.reaction-btn').forEach(btn=>{
+    const e=btn.dataset.emoji;
+    btn.classList.toggle('active',current===e);
+    btn.classList.toggle('dimmed',!!(current&&current!==e));
+  });
+  const label=row.querySelector('.reaction-label');
+  if(label)label.textContent=current?map[current]:'';
+}
+
+function createReactionRow(msgIndex){
+  const div=document.createElement('div');
+  div.id='reactions-'+msgIndex;
+  div.style.cssText='display:flex;gap:4px;padding-left:38px;margin-top:4px;align-items:center;flex-wrap:wrap;';
+  [{emoji:'👍',label:'Felt natural'},{emoji:'😕',label:'Felt off'},{emoji:'💡',label:'Learned something'},{emoji:'😰',label:'Felt stuck'}].forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className='reaction-btn';btn.dataset.emoji=r.emoji;
+    btn.onclick=()=>addReaction(msgIndex,r.emoji);
+    btn.innerHTML=`${r.emoji}<span class="reaction-tip">${r.label}</span>`;
+    div.appendChild(btn);
+  });
+  const label=document.createElement('span');
+  label.className='reaction-label';
+  label.style.cssText='font-size:11px;color:var(--muted);margin-left:2px;';
+  div.appendChild(label);
+  return div;
+}
+
+function setRating(n){
+  currentRating=n;
+  document.querySelectorAll('.rating-btn').forEach(btn=>{
+    const r=parseInt(btn.dataset.r);
+    btn.style.background=r<=n?'var(--gold)':'white';
+    btn.style.color=r<=n?'white':'var(--muted)';
+    btn.style.borderColor=r<=n?'var(--gold)':'var(--border-light)';
+  });
 }
 
 renderUnitLists();
