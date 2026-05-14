@@ -916,17 +916,27 @@ function loadScenario(sc){
 async function startConversation(sc){
   if(window._conversationStarted) return;
   window._conversationStarted = true;
+  // Clear chat area to guarantee clean state
+  const ca = document.getElementById('chat-area');
+  if(ca) ca.innerHTML = '';
   const sys=buildClientSystemPrompt(sc);
   const isSG18=currentUnit&&currentUnit.sg===18;
-  const op=isSG18?`You are the supervisor. Open the supervision session naturally. Ask the student what they want to bring today. Keep it to 2-3 sentences.`:`You are ${sc.client.name.split(',')[0]}, the client. Give your opening statement to begin the counselling session. Keep it to 2-4 sentences — natural and authentic, showing what has brought you here today.`;
+  const op=isSG18
+    ?`You are the supervisor. Open the supervision session naturally. Ask the student what they want to bring today. Keep it to 2-3 sentences.`
+    :`You are ${sc.client.name.split(',')[0]}, the client. Give your opening statement to begin the counselling session. Keep it to 2-4 sentences.`;
   showTyping('client');
   try{
     const r=await callClaude([{role:'user',content:op}],sys);
-    removeTyping();conversationHistory.push({role:'assistant',content:r});addMessage('client',r);
+    removeTyping();
+    conversationHistory.push({role:'assistant',content:r});
+    addMessage('client',r);
   }catch(e){
     removeTyping();
-    const fb=isSG18?'Good to see you. What would you like to bring to supervision today?':"I'm not really sure where to start. Things have just been... a lot lately.";
-    conversationHistory.push({role:'assistant',content:fb});addMessage('client',fb);
+    const fb=isSG18
+      ?'Good to see you. What would you like to bring to supervision today?'
+      :"I'm not really sure where to start. Things have just been... a lot lately.";
+    conversationHistory.push({role:'assistant',content:fb});
+    addMessage('client',fb);
   }
 }
 
