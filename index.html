@@ -118,8 +118,8 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .outline-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
 .primary-btn{flex:1;padding:10px;border-radius:8px;border:none;background:var(--blue);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}
 .primary-btn:hover{background:#0f2a42;}
-#screen-roleplay{background:var(--warm);}
-#screen-roleplay .app-header{height:auto;padding:8px 16px;align-items:center;}
+#screen-roleplay{background:var(--warm);display:flex;flex-direction:column;height:100dvh;height:var(--app-height,100dvh);}
+#screen-roleplay .app-header{height:auto;padding:8px 16px;align-items:center;flex-shrink:0;}
 .rp-chip{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.2);}
 .rp-chip.cumulative{background:rgba(106,143,96,0.4);border-color:rgba(106,143,96,0.5);}
 .client-banner{background:var(--sage-pale);border-bottom:1px solid var(--sage-mid);padding:11px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -128,7 +128,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .client-context{font-size:11px;color:var(--mid);}
 .crisis-guide-btn{margin-left:auto;font-size:11px;padding:4px 11px;border-radius:20px;background:var(--crisis-light);color:var(--crisis);border:1px solid #d4a0a0;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;}
 .crisis-guide-btn:hover{background:#ead8d8;}
-.chat-area{flex:1;overflow-y:auto;padding:16px 20px 80px 20px;display:flex;flex-direction:column;gap:12px;}
+.chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:0;}
 .msg{display:flex;gap:8px;align-items:flex-start;max-width:680px;width:100%;align-self:center;}
 .msg.student{flex-direction:row-reverse;}
 .msg-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;font-family:'Lora',serif;}
@@ -153,7 +153,7 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .dot:nth-child(2){animation-delay:.2s;}
 .dot:nth-child(3){animation-delay:.4s;}
 @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-4px);}}
-.input-area{background:white;border-top:1px solid var(--border-light);padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;}
+.input-area{background:white;border-top:1px solid var(--border-light);padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;position:sticky;bottom:0;z-index:50;width:100%;}
 .input-hint{font-size:11px;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
 .input-row{display:flex;gap:8px;align-items:flex-end;}
 .action-row{display:flex;gap:7px;margin-top:8px;}
@@ -218,10 +218,10 @@ h1,h2,h3,.serif{font-family:'Lora',serif;}
 .reaction-tip{visibility:hidden;opacity:0;pointer-events:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;transition:opacity .15s;z-index:100;}
 .reaction-tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--charcoal);}
 .reaction-btn:hover .reaction-tip{visibility:visible;opacity:1;}
-.notes-fab{position:fixed;bottom:90px;right:20px;z-index:200;width:50px;height:50px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;font-size:20px;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.notes-fab{position:fixed;top:60px;right:12px;z-index:200;width:40px;height:40px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .notes-fab:hover{background:#0f2a42;}
 .notes-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--gold);border-radius:50%;font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;border:2px solid white;}
-.notes-panel{position:fixed;bottom:150px;right:20px;z-index:200;width:290px;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);border:1.5px solid var(--gold-light);overflow:hidden;}
+.notes-panel{position:fixed;top:108px;right:12px;z-index:200;width:280px;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);border:1.5px solid var(--gold-light);overflow:hidden;}
 .notes-header{background:var(--gold);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;}
 .notes-list{max-height:130px;overflow-y:auto;padding:8px 14px;border-bottom:1px solid var(--gold-light);}
 .notes-input-row{padding:8px 10px;display:flex;gap:8px;}
@@ -1087,90 +1087,7 @@ function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendSt
 function handleDrillKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitDrillResponse();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
 
-// ── NOTES, REACTIONS, RATING ──────────────────────────────────────────────
-let sessionNotes=[];let notesOpen=false;let sessionCallStart=null;
-let messageReactions={};let currentRating=0;
 
-function startSessionTimer(){sessionCallStart=Date.now();}
-
-function getCallTime(){
-  if(!sessionCallStart)return'00:00';
-  const s=Math.floor((Date.now()-sessionCallStart)/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-}
-
-function toggleNotes(){
-  notesOpen=!notesOpen;
-  const panel=document.getElementById('notes-panel');
-  if(panel)panel.style.display=notesOpen?'block':'none';
-  const fab=document.getElementById('notes-fab');
-  if(fab)fab.style.background=notesOpen?'var(--gold)':'var(--blue)';
-}
-
-function addNote(){
-  const input=document.getElementById('note-input');
-  if(!input||!input.value.trim())return;
-  sessionNotes.push({time:getCallTime(),text:input.value.trim()});
-  input.value='';renderNotes();
-}
-
-function renderNotes(){
-  const list=document.getElementById('notes-list');
-  const badge=document.getElementById('notes-badge');
-  if(list){
-    if(sessionNotes.length===0){list.style.display='none';}
-    else{list.style.display='block';list.innerHTML=sessionNotes.map(n=>`<div style="display:flex;gap:8px;font-size:12px;margin-bottom:5px;"><span style="color:var(--gold);font-weight:700;flex-shrink:0;">[${n.time}]</span><span style="color:var(--charcoal);line-height:1.4;">${escapeHTML(n.text)}</span></div>`).join('');list.scrollTop=list.scrollHeight;}
-  }
-  if(badge){badge.style.display=sessionNotes.length>0?'flex':'none';badge.textContent=sessionNotes.length;}
-}
-
-function addReaction(msgIndex,emoji){
-  if(messageReactions[msgIndex]===emoji){delete messageReactions[msgIndex];}
-  else{messageReactions[msgIndex]=emoji;}
-  renderReactions(msgIndex);
-}
-
-function renderReactions(msgIndex){
-  const row=document.getElementById('reactions-'+msgIndex);
-  if(!row)return;
-  const current=messageReactions[msgIndex];
-  const map={'👍':'Felt natural','😕':'Felt off','💡':'Learned something','😰':'Felt stuck'};
-  row.querySelectorAll('.reaction-btn').forEach(btn=>{
-    const e=btn.dataset.emoji;
-    btn.classList.toggle('active',current===e);
-    btn.classList.toggle('dimmed',!!(current&&current!==e));
-  });
-  const label=row.querySelector('.reaction-label');
-  if(label)label.textContent=current?map[current]:'';
-}
-
-function createReactionRow(msgIndex){
-  const div=document.createElement('div');
-  div.id='reactions-'+msgIndex;
-  div.style.cssText='display:flex;gap:4px;padding-left:38px;margin-top:4px;align-items:center;flex-wrap:wrap;';
-  [{emoji:'👍',label:'Felt natural'},{emoji:'😕',label:'Felt off'},{emoji:'💡',label:'Learned something'},{emoji:'😰',label:'Felt stuck'}].forEach(r=>{
-    const btn=document.createElement('button');
-    btn.className='reaction-btn';btn.dataset.emoji=r.emoji;
-    btn.onclick=()=>addReaction(msgIndex,r.emoji);
-    btn.innerHTML=`${r.emoji}<span class="reaction-tip">${r.label}</span>`;
-    div.appendChild(btn);
-  });
-  const label=document.createElement('span');
-  label.className='reaction-label';
-  label.style.cssText='font-size:11px;color:var(--muted);margin-left:2px;';
-  div.appendChild(label);
-  return div;
-}
-
-function setRating(n){
-  currentRating=n;
-  document.querySelectorAll('.rating-btn').forEach(btn=>{
-    const r=parseInt(btn.dataset.r);
-    btn.style.background=r<=n?'var(--gold)':'white';
-    btn.style.color=r<=n?'white':'var(--muted)';
-    btn.style.borderColor=r<=n?'var(--gold)':'var(--border-light)';
-  });
-}
 // ── GOOGLE SHEETS LOGGING ─────────────────────────────────────────────────
 async function logToSheets(studentName, reportText) {
   try {
