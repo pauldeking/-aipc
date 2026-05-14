@@ -898,7 +898,7 @@ function loadScenario(sc){
   const isSG18=currentUnit&&currentUnit.sg===18;
   document.getElementById('student-input').placeholder=isSG18?'Respond to your supervisor…':'Type your response to the client…';
   document.getElementById('input-hint-text').textContent=isSG18?'Respond as the counsellor in supervision':'Respond as the counsellor';
-  document.getElementById('chat-area').innerHTML='';
+  document.getElementById('chat-area').innerHTML='';window._conversationStarted=false;
   // Reset notes and reactions for new session
   sessionNotes=[];messageReactions={};currentRating=0;notesOpen=false;
   sessionCallStart=null;
@@ -914,6 +914,8 @@ function loadScenario(sc){
 }
 
 async function startConversation(sc){
+  if(window._conversationStarted) return;
+  window._conversationStarted = true;
   const sys=buildClientSystemPrompt(sc);
   const isSG18=currentUnit&&currentUnit.sg===18;
   const op=isSG18?`You are the supervisor. Open the supervision session naturally. Ask the student what they want to bring today. Keep it to 2-3 sentences.`:`You are ${sc.client.name.split(',')[0]}, the client. Give your opening statement to begin the counselling session. Keep it to 2-4 sentences — natural and authentic, showing what has brought you here today.`;
@@ -1018,7 +1020,7 @@ function addMessage(role,content){
   ca.appendChild(wrap);
   // Add emoji reaction row after client/supervisor messages (not student's own messages)
   if(role==='client'){
-    const msgIndex = ca.querySelectorAll('.msg').length - 1;
+    const msgIndex = ca.querySelectorAll('.msg.client, .msg.supervisor, .msg.student').length - 1;
     ca.appendChild(createReactionRow(msgIndex));
   }
   ca.scrollTop=ca.scrollHeight;
@@ -1040,7 +1042,7 @@ function addFeedbackMessage(jsonOrText,isDebrief){
 }
 
 function showTyping(role){
-  const ca=document.getElementById('chat-area');const wrap=document.createElement('div');wrap.className=`msg ${role}`;wrap.id='typing-indicator';
+  const ca=document.getElementById('chat-area');const wrap=document.createElement('div');wrap.className='typing-wrapper';wrap.id='typing-indicator';
   const isSG18=currentUnit&&currentUnit.sg===18;
   const ac=role==='client'?'client-av':'supervisor-av';
   const av=role==='client'?(isSG18?'Sv':currentScenario.client.initials):'Sup';
